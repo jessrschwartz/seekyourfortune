@@ -62,12 +62,15 @@ const fortuneDecks = {
 let history = [];
 
 // ----- UTILITIES -----
+
+// Selects and returns a random fortune from the chosen category deck
 function getRandomFortune(category) {
   const deck = fortuneDecks[category] || fortuneDecks.general;
   const index = Math.floor(Math.random() * deck.length);
   return deck[index];
 }
 
+// Loads saved fortune history from browser localStorage on page load
 function loadHistory() {
   const stored = localStorage.getItem("fortuneHistory");
   if (stored) {
@@ -81,10 +84,12 @@ function loadHistory() {
   }
 }
 
+// Saves the current fortune history array to browser localStorage
 function saveHistory() {
   localStorage.setItem("fortuneHistory", JSON.stringify(history));
 }
 
+// Formats a Date object into a readable timestamp for display
 function formatTimestamp(date) {
   return date.toLocaleString(undefined, {
     month: "short",
@@ -94,7 +99,7 @@ function formatTimestamp(date) {
   });
 }
 
-// Render history into side panel
+// Renders the stored fortune history list into the sidebar using jQuery
 function renderHistory() {
   const $list = $("#history-list");
   $list.empty();
@@ -125,7 +130,7 @@ function renderHistory() {
     });
 }
 
-// Map category value to label
+// Converts internal category values into user-friendly display labels
 function getCategoryLabel(value) {
   switch (value) {
     case "general": return "General Energy";
@@ -137,6 +142,7 @@ function getCategoryLabel(value) {
 }
 
 // ----- MAIN -----
+// Initializes the application once the DOM is fully loaded
 $(document).ready(function () {
   // Load and render history on page load
   loadHistory();
