@@ -276,7 +276,7 @@ if (history.length === 0) {
 } else if (history.length >= 6) {
   repeatPhrase = "You're curious today";
 } else {
-  repeatPhrase = "Let's see";
+  repeatPhrase = "Another fortune for you,";
 }
 
 
@@ -288,6 +288,12 @@ if (history.length === 0) {
     const mainGreeting = `${timePhrase}`;
 const subGreeting = `${repeatPhrase}, ${name}. Here’s what the cards are whispering.`;
     $("#fortune-greeting").text(mainGreeting);
+    // Hide second line, then reveal it gently
+    $("#fortune-subgreeting")
+      .hide()
+      .text(subGreeting)
+      .delay(300)
+      .fadeIn(300);
     $("#fortune-subgreeting").text(subGreeting);
     $("#fortune-text").text(fortune.text);
     $("#fortune-note").text(fortune.note);
