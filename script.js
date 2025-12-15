@@ -12,6 +12,26 @@ const fortuneDecks = {
     {
       text: "You’re carrying someone else’s worry without realizing it.",
       note: "Ask: is this actually mine to hold? You’re allowed to put some of it down."
+    },
+    {
+      text: "What keeps returning to your mind is trying to teach you.",
+      note: "Pay attention to the repeat themes. They’re your soul’s syllabus."
+    },
+    {
+      text: "A delayed answer will land right on time.",
+      note: "Patience isn’t passive. It’s power. Trust the timing."
+    },
+    {
+      text: "You already noticed the pattern — that’s your sign.",
+      note: "Trust your observations more than your doubts."
+    },
+    {
+      text: "Momentum is building even if today feels quiet.",
+      note: "Small progress still counts. Keep going."
+    },
+    {
+      text: "Something you thought was finished still has one more chapter.",
+      note: "Don’t force closure. Let it reveal itself."
     }
   ],
   love: [
@@ -26,6 +46,26 @@ const fortuneDecks = {
     {
       text: "You’re learning to receive love without apologizing for it.",
       note: "Practice saying ‘thank you’ instead of shrinking the compliment."
+    },
+    {
+      text: "You’re learning the difference between chemistry and compatibility.",
+      note: "Intensity isn’t always intimacy. Look for a fireplace over fireworks."
+    },
+    {
+      text: "Affection doesn’t have to be loud to be real.",
+      note: "Consistency is a love language."
+    },
+    {
+      text: "You’re allowed to want depth without drama.",
+      note: "Love should not cost you your peace."
+    },
+    {
+      text: "A gentle truth will do more than a perfect performance.",
+      note: "Say the real thing, even if it’s simple."
+    },
+    {
+      text: "Someone is responding to your energy — even if it’s subtle.",
+      note: "Notice who makes you feel safe to be yourself."
     }
   ],
   school: [
@@ -40,6 +80,26 @@ const fortuneDecks = {
     {
       text: "Future you is already proud of you for not giving up this week.",
       note: "Do one action that would make that version of you nod and go, ‘Yep, that was the moment.’"
+    },
+    {
+      text: "Confusion is a sign you're actually learning.",
+      note: "Struggle is data, not defeat."
+    },
+    {
+      text: "One small win today is worth more than ten planned wins tomorrow.",
+      note: "Build momentum, not perfection."
+    },
+    {
+      text: "The skill you're building now will serve you in unexpected ways later.",
+      note: "Future-you is collecting these hours."
+    },
+    {
+      text: "Your inner critic is not an accurate grading rubric.",
+      note: "Fact check yourself against actual feedback, not imagined flaws."
+    },
+    {
+      text: "Progress doesn't always feel productive.",
+      note: "Show up anyway. The results stick."
     }
   ],
   vibes: [
@@ -54,6 +114,26 @@ const fortuneDecks = {
     {
       text: "You’re allowed to be both soft and very, very done with everyone’s nonsense.",
       note: "Protect your peace without apologizing for outgrowing old dynamics."
+    },
+    {
+      text: "Rest is not a reward. It’s a necessity.",
+      note: "You don't have to earn your breaks."
+    },
+      {
+      text: "You don't need to solve everything right now.",
+      note: "Put it down; it will still be there tomorrow."
+    },
+      {
+      text: "Gentleness is strength in disguise.",
+      note: "Softness can move mountains."
+    },
+      {
+      text: "Your pace is allowed to change.",
+      note: "Slow is still forward."
+    },
+      {
+      text: "Give yourself fewer obligations and more room to breathe.",
+      note: "Space is a strategy."
     }
   ]
 };
@@ -65,6 +145,17 @@ let history = [];
 
 // Selects and returns a random fortune from the chosen category deck
 function getRandomFortune(category) {
+
+  // Small chance to return a rare fortune instead of a normal one
+  const rareChance = Math.random();
+  if (rareChance < 0.05) {
+    return {
+      text: "You weren’t meant to pull this today. But here we are.",
+      note: "Small choices shift timelines more than grand plans."
+    };
+  }
+
+  // Normal fortune selection logic
   const deck = fortuneDecks[category] || fortuneDecks.general;
   const index = Math.floor(Math.random() * deck.length);
   return deck[index];
@@ -159,15 +250,45 @@ $(document).ready(function () {
     const fortune = getRandomFortune(category);
     const categoryLabel = getCategoryLabel(category);
 
-    // Build greeting text
-    const greeting = `Alright, ${name}. Here’s what the cards are whispering:`;
+// Build a time-aware greeting (morning/afternoon/evening/night)
+const hour = new Date().getHours();
+let timePhrase = "";
+
+if (hour >= 5 && hour < 12) {
+  timePhrase = "The day is still unfolding.";
+} else if (hour >= 12 && hour < 17) {
+  timePhrase = "Midday clarity is coming through.";
+} else if (hour >= 17 && hour < 21) {
+  timePhrase = "Evening reflections are settling in.";
+} else {
+  timePhrase = "It's late. The cards speak differently now.";
+}
+
+// Adjust tone if user continues pulling fortunes (the cards remember)
+let repeatPhrase = "";
+
+if (history.length === 0) {
+  repeatPhrase = "Alright";
+} else if (history.length === 1) {
+  repeatPhrase = "Back again";
+} else if (history.length === 2) {
+  repeatPhrase = "Three times a charm";
+} else if (history.length >= 6) {
+  repeatPhrase = "You're curious today";
+} else {
+  repeatPhrase = "Let's see";
+}
+
 
     // Animate card reveal
     const $card = $("#fortune-card");
     const $placeholder = $("#fortune-placeholder");
 
     $("#fortune-category-tag").text(categoryLabel.toUpperCase());
-    $("#fortune-greeting").text(greeting);
+    const mainGreeting = `${timePhrase}`;
+const subGreeting = `${repeatPhrase}, ${name}. Here’s what the cards are whispering.`;
+    $("#fortune-greeting").text(mainGreeting);
+    $("#fortune-subgreeting").text(subGreeting);
     $("#fortune-text").text(fortune.text);
     $("#fortune-note").text(fortune.note);
 
