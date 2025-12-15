@@ -204,6 +204,12 @@ button {
   color: #cba6ff;
 }
 
+.time-status {
+  font-size: 0.85rem;
+  opacity: 0.8;
+  margin: 0.25rem 0 0.75rem;
+}
+
 /* History list */
 .history-note {
   font-size: 0.8rem;
