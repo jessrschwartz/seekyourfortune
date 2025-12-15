@@ -119,19 +119,19 @@ const fortuneDecks = {
       text: "Rest is not a reward. It’s a necessity.",
       note: "You don't have to earn your breaks."
     },
-      {
+    {
       text: "You don't need to solve everything right now.",
       note: "Put it down; it will still be there tomorrow."
     },
-      {
+    {
       text: "Gentleness is strength in disguise.",
       note: "Softness can move mountains."
     },
-      {
+    {
       text: "Your pace is allowed to change.",
       note: "Slow is still forward."
     },
-      {
+    {
       text: "Give yourself fewer obligations and more room to breathe.",
       note: "Space is a strategy."
     }
@@ -250,53 +250,69 @@ $(document).ready(function () {
     const fortune = getRandomFortune(category);
     const categoryLabel = getCategoryLabel(category);
 
-// Build a time-aware greeting (morning/afternoon/evening/night)
-const hour = new Date().getHours();
-let timePhrase = "";
+    // Build a time-aware greeting (morning/afternoon/evening/night)
+    const hour = new Date().getHours();
+    let timePhrase = "";
 
-if (hour >= 5 && hour < 12) {
-  timePhrase = "The day is still unfolding.";
-} else if (hour >= 12 && hour < 17) {
-  timePhrase = "Midday clarity is coming through.";
-} else if (hour >= 17 && hour < 21) {
-  timePhrase = "Evening reflections are settling in.";
-} else {
-  timePhrase = "It's late. The cards speak differently now.";
-}
+    if (hour >= 5 && hour < 12) {
+      timePhrase = "The day is still unfolding.";
+    } else if (hour >= 12 && hour < 17) {
+      timePhrase = "Midday clarity is coming through.";
+    } else if (hour >= 17 && hour < 21) {
+      timePhrase = "Evening reflections are settling in.";
+    } else {
+      timePhrase = "It's late. The cards speak differently now.";
+    }
 
-// Adjust tone if user continues pulling fortunes (the cards remember)
-let repeatPhrase = "";
+    // Adjust tone if user continues pulling fortunes (the cards remember)
+    let repeatPhrase = "";
 
-if (history.length === 0) {
-  repeatPhrase = "Alright";
-} else if (history.length === 1) {
-  repeatPhrase = "Back again";
-} else if (history.length === 2) {
-  repeatPhrase = "Three times a charm";
-} else if (history.length >= 6) {
-  repeatPhrase = "You're curious today";
-} else {
-  repeatPhrase = "Another fortune for you,";
-}
-
+    if (history.length === 0) {
+      repeatPhrase = "Alright";
+    } else if (history.length === 1) {
+      repeatPhrase = "Back again";
+    } else if (history.length === 2) {
+      repeatPhrase = "Three times a charm";
+    } else if (history.length >= 5) {
+      repeatPhrase = "You're curious today";
+    } else {
+      repeatPhrase = "Another fortune for you";
+    }
 
     // Animate card reveal
     const $card = $("#fortune-card");
     const $placeholder = $("#fortune-placeholder");
 
+    // Update card content
     $("#fortune-category-tag").text(categoryLabel.toUpperCase());
+
     const mainGreeting = `${timePhrase}`;
-const subGreeting = `${repeatPhrase}, ${name}. Here’s what the cards are whispering.`;
+    const subGreeting = `${repeatPhrase}, ${name}. Here’s what the cards are whispering.`;
+
     $("#fortune-greeting").text(mainGreeting);
-    // Hide second line, then reveal it gently
+
+    // Show the subgreeting before the fortune, with a gentle fade
     $("#fortune-subgreeting")
+      .stop(true, true)
       .hide()
       .text(subGreeting)
-      .delay(300)
+      .fadeIn(200);
+  
+    // Reveal the fortune text after a brief pause
+    $("#fortune-text")
+      .stop(true, true)
+      .hide()
+      .text(fortune.text)
+      .delay(1000)   // ~1 second pause
       .fadeIn(300);
-    $("#fortune-subgreeting").text(subGreeting);
-    $("#fortune-text").text(fortune.text);
-    $("#fortune-note").text(fortune.note);
+
+    // Reveal the note just after the fortune
+    $("#fortune-note")
+      .stop(true, true)
+      .hide()
+      .text(fortune.note)
+      .delay(1200)   // slightly after the fortune
+      .fadeIn(300);
 
     $placeholder.fadeOut(150, function () {
       $card
@@ -307,7 +323,7 @@ const subGreeting = `${repeatPhrase}, ${name}. Here’s what the cards are whisp
           $(this).animate(
             { opacity: 1 },
             {
-              step: function (now, fx) {
+              step: function () {
                 // subtle scale / rotation reset
                 $(this).css({ transform: "rotateX(0deg) scale(1)" });
               },
@@ -326,6 +342,7 @@ const subGreeting = `${repeatPhrase}, ${name}. Here’s what the cards are whisp
       name: name,
       text: fortune.text
     });
+
     saveHistory();
     renderHistory();
   });
