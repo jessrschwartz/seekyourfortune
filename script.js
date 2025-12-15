@@ -143,10 +143,7 @@ let history = [];
 
 // ----- UTILITIES -----
 
-// Selects and returns a random fortune from the chosen category deck
 function getRandomFortune(category) {
-
-  // Small chance to return a rare fortune instead of a normal one
   const rareChance = Math.random();
   if (rareChance < 0.05) {
     return {
@@ -155,32 +152,26 @@ function getRandomFortune(category) {
     };
   }
 
-  // Normal fortune selection logic
   const deck = fortuneDecks[category] || fortuneDecks.general;
   const index = Math.floor(Math.random() * deck.length);
   return deck[index];
 }
 
-// Loads saved fortune history from browser localStorage on page load
 function loadHistory() {
   const stored = localStorage.getItem("fortuneHistory");
   if (stored) {
     try {
       history = JSON.parse(stored);
-    } catch (e) {
+    } catch {
       history = [];
     }
-  } else {
-    history = [];
   }
 }
 
-// Saves the current fortune history array to browser localStorage
 function saveHistory() {
   localStorage.setItem("fortuneHistory", JSON.stringify(history));
 }
 
-// Formats a Date object into a readable timestamp for display
 function formatTimestamp(date) {
   return date.toLocaleString(undefined, {
     month: "short",
@@ -190,38 +181,28 @@ function formatTimestamp(date) {
   });
 }
 
-// Renders the stored fortune history list into the sidebar using jQuery
 function renderHistory() {
   const $list = $("#history-list");
   $list.empty();
 
   if (history.length === 0) {
-    $list.append(
-      `<li class="history-item">
-        <div class="history-text">No fortunes yet. Your cosmic record is blank.</div>
-      </li>`
-    );
+    $list.append(`<li class="history-item"><div class="history-text">No fortunes yet. Your cosmic record is blank.</div></li>`);
     return;
   }
 
-  history
-    .slice() // copy
-    .reverse() // show newest first
-    .forEach(item => {
-      const $li = $(`
-        <li class="history-item">
-          <div class="history-meta">
-            <span>${item.categoryLabel}</span>
-            <span>${item.timestamp}</span>
-          </div>
-          <div class="history-text">${item.text}</div>
-        </li>
-      `);
-      $list.append($li);
-    });
+  history.slice().reverse().forEach(item => {
+    $list.append(`
+      <li class="history-item">
+        <div class="history-meta">
+          <span>${item.categoryLabel}</span>
+          <span>${item.timestamp}</span>
+        </div>
+        <div class="history-text">${item.text}</div>
+      </li>
+    `);
+  });
 }
 
-// Converts internal category values into user-friendly display labels
 function getCategoryLabel(value) {
   switch (value) {
     case "general": return "General Energy";
@@ -233,24 +214,12 @@ function getCategoryLabel(value) {
 }
 
 // ----- MAIN -----
-// Initializes the application once the DOM is fully loaded
 $(document).ready(function () {
-  // Load and render history on page load
   loadHistory();
   renderHistory();
 
-  // Handle fortune form submit
-  $("#fortune-form").on("submit", function (e) {
-    e.preventDefault();
-
-    const rawName = $("#name").val().trim();
-    const name = rawName || "Seeker";
-    const category = $("#category").val();
-
-    const fortune = getRandomFortune(category);
-    const categoryLabel = getCategoryLabel(category);
-
-    // Build a time-aware greeting (morning/afternoon/evening/night)
+  // Time-of-day context under "Today's Fortune"
+  (function setTimeStatus() {
     const hour = new Date().getHours();
     let timePhrase = "";
 
@@ -264,7 +233,18 @@ $(document).ready(function () {
       timePhrase = "It's late. The cards speak differently now.";
     }
 
-    // Adjust tone if user continues pulling fortunes (the cards remember)
+    $("#time-status em").text(timePhrase);
+  })();
+
+  $("#fortune-form").on("submit", function (e) {
+    e.preventDefault();
+
+    const name = $("#name").val().trim() || "Seeker";
+    const category = $("#category").val();
+
+    const fortune = getRandomFortune(category);
+    const categoryLabel = getCategoryLabel(category);
+
     let repeatPhrase = "";
 
     if (history.length === 0) {
@@ -279,67 +259,42 @@ $(document).ready(function () {
       repeatPhrase = "Another fortune for you";
     }
 
-    // Animate card reveal
     const $card = $("#fortune-card");
     const $placeholder = $("#fortune-placeholder");
 
-    // Update card content
     $("#fortune-category-tag").text(categoryLabel.toUpperCase());
 
-    const mainGreeting = `${timePhrase}`;
     const subGreeting = `${repeatPhrase}, ${name}. Here’s what the cards are whispering.`;
 
-    $("#fortune-greeting").text(mainGreeting);
-
-    // Show the subgreeting before the fortune, with a gentle fade
     $("#fortune-subgreeting")
       .stop(true, true)
       .hide()
       .text(subGreeting)
       .fadeIn(200);
-  
-    // Reveal the fortune text after a brief pause
+
     $("#fortune-text")
       .stop(true, true)
       .hide()
       .text(fortune.text)
-      .delay(1000)   // ~1 second pause
+      .delay(1000)
       .fadeIn(300);
 
-    // Reveal the note just after the fortune
     $("#fortune-note")
       .stop(true, true)
       .hide()
       .text(fortune.note)
-      .delay(1200)   // slightly after the fortune
+      .delay(1200)
       .fadeIn(300);
 
     $placeholder.fadeOut(150, function () {
-      $card
-        .removeClass("hidden")
-        .hide()
-        .css({ transform: "rotateX(15deg) scale(0.9)" })
-        .fadeIn(200, function () {
-          $(this).animate(
-            { opacity: 1 },
-            {
-              step: function () {
-                // subtle scale / rotation reset
-                $(this).css({ transform: "rotateX(0deg) scale(1)" });
-              },
-              duration: 150
-            }
-          );
-        });
+      $card.removeClass("hidden").hide().fadeIn(200);
     });
 
-    // Add to history
-    const now = new Date();
     history.push({
-      timestamp: formatTimestamp(now),
-      category: category,
-      categoryLabel: categoryLabel,
-      name: name,
+      timestamp: formatTimestamp(new Date()),
+      category,
+      categoryLabel,
+      name,
       text: fortune.text
     });
 
@@ -347,12 +302,9 @@ $(document).ready(function () {
     renderHistory();
   });
 
-  // Clear history
   $("#clear-history").on("click", function () {
-    if (history.length === 0) return;
-
-    const confirmClear = confirm("Clear all stored fortunes from this device?");
-    if (!confirmClear) return;
+    if (!history.length) return;
+    if (!confirm("Clear all stored fortunes from this device?")) return;
 
     history = [];
     saveHistory();
